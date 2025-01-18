@@ -1,0 +1,16 @@
+name: cube0
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python==3.12
+  - numpy
+  - pandas
+  - requests
+  - matplotlib
+  - scikit-learn
+  - spyder
+  - spyder-kernels
+  - ipython
+  - tensorflow==2.17
