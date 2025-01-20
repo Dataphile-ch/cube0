@@ -34,3 +34,13 @@ Several definitions of cube entropy are evaluated:
 Is it actually possible to estimate entropy (the distance from a given cube to solved state)?
 
 Perhaps there is insufficient information in the cube to determine it's state.  What would this mean?
+
+# To do
+* Re-implement MCTS with approximate policy iteration
+* Re-do matrix distance entropy
+* Collect performance statistics on different strategies
+* Re-do NN training
+
+# References
+https://paperswithcode.com/paper/solving-the-rubiks-cube-with-approximate
+https://courses.cs.washington.edu/courses/cse599i/18wi/resources/lecture19/lecture19.pdf
