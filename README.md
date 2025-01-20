@@ -12,6 +12,8 @@ These strategies typically take at least 40-50 moves to solve a cube, at least 2
 # Concepts
 The Cube() class creates an object with an internal representation (6x3x3 matrix, but it's not very important for most purposes).  It allows the cube to be manipulated and for various attributes to be calculated.  Some methods are obvious, e.g. reset().  Core concepts are:
 * Face: A cube has 6 faces: Right, Left, Up, Down, Front, Back [R,L,U,D,F,B]
+* Sticker: each face has 3x3=9 squares or stickers.
+* Cubelet: what actually gets moved are the cubelets, either an edge cubelet (with 2 stickers) or a corner cubelet (with 3 stickers)
 * Rotation: Each face can be rotated 1, 2, or 3 times.  4 times returns to the original position, so is a non-move.
 * Move: A move is a sequence of rotations.  e.g. R2, U1, D3
 # Solving Method
@@ -24,7 +26,7 @@ The reward function is implemented inside the Cube() class as "entropy".  This t
 
 Several definitions of cube entropy are evaluated:
 * Naive entropy: count the number of "stickers" that are on the wrong face.
-* Alignment entropy: based on the observation that corner and edge cubes need to be aligned before they can be moved into place, how many alignments are there in the cube?
+* Alignment entropy: based on the observation that corner and edge cubelets need to be aligned before they can be moved into place, how many alignments are there in the cube?
 * Matrix entropy: use a linear algebra distance norm to calculate the distance between the current cube and the solved cube in matrix/vector form.
 * Neural Network entropy: train a neural network on different cubes at different numbers of moves from solved.  The NN can then try to fit any given cube and estimate the number of moves to solve.
 
