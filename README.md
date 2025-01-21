@@ -6,7 +6,7 @@ The cube can be scrambled in a few moves.  The number called "God's number" for 
 So, no cube can be more that 20 moves from the solved state.
 
 Current solving strategies rely on pattern recognition, step-by-step solving, and memorizing (or programming) up to 100 "algorithms" to move from 1 step to the next.  The most common strategy in speed cubing is CFOP https://jperm.net/3x3/cfop
-These strategies typically take at least 40-50 moves to solve a cube, at least 2x as many as necessary.
+These strategies typically take at least 40-50 moves to solve a cube, at least 2-3x as many as necessary.
 
 > Is it possible to quickly find a minimal set of moves to solve any cube?
 # Concepts
