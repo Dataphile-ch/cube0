@@ -11,8 +11,8 @@ These strategies typically take at least 40-50 moves to solve a cube, at least 2
 > Is it possible to quickly find a minimal set of moves to solve any cube?
 # Concepts
 The Cube() class creates an object with an internal representation (6x3x3 matrix, but it's not very important for most purposes).  It allows the cube to be manipulated and for various attributes to be calculated.  Some methods are obvious, e.g. reset().  Core concepts are:
-* Face: A cube has 6 faces: Right, Left, Up, Down, Front, Back [R,L,U,D,F,B]
-* Sticker: each face has 3x3=9 squares or stickers.
+* Face: A cube has 6 faces: Right, Left, Up, Down, Front, Back [R,L,U,D,F,B], which have colours red, orange, white, yellow, green, blue.
+* Facelet/Sticker: each face has 3x3=9 squares which have coloured stickers in the original Rubik's cube.
 * Cubelet: what actually gets moved are the cubelets, either an edge cubelet (with 2 stickers) or a corner cubelet (with 3 stickers)
 * Rotation: Each face can be rotated 1, 2, or 3 times.  4 times returns to the original position, so is a non-move.
 * Move: A move is a sequence of rotations.  e.g. R2, U1, D3
