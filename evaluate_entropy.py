@@ -29,13 +29,7 @@ def sample_cube(k) :
     cube = Cube()
     cube.reset()
     
-    move = []
-    i = 0
-    while i < k :
-        move.extend(mycube.rand_move(3))
-        move = cube.compress_moves( move )
-        i = len(move)
-    move = move[:k]
+    move = cube.rand_move(k)
     cube.move(move)
 
     return cube.cube
@@ -45,8 +39,8 @@ def sample_cube(k) :
 # Generate n sample cubes at each level l
 test_cube = Cube()
 results = []
-levels = 10
-samples = 10
+levels = 15
+samples = 20
 for l in range(1,levels+1) :
     for n in range(samples) :
         test_cube.cube = sample_cube(l)
@@ -93,7 +87,7 @@ axs[1,1].scatter(x, y3, c=colours)
 axs[1,1].set_xlabel('Actual Entropy')
 axs[1,1].set_ylabel('Euclidian Entropy')
 axs[1,1].set_xlim(0,levels+1)
-axs[1,1].set_ylim(0,15)
+axs[1,1].set_ylim(0,25)
 
 fig.suptitle('Comparison of Cube Entropy Measures')
 

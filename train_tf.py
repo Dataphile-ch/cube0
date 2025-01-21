@@ -17,15 +17,6 @@ import pickle
 # cubes at k=4 : 104,976
 # cubes at k=5 : 1,889,568
 
-def vector_cube(cube) :
-    """ returns some kind of vector representation of cube
-    with each row = a face and each col = colour 1 or 0
-    """
-    flat = np.reshape(cube, (-1))
-    out = np.zeros((len(flat),max(flat)+1))
-    for i, f in enumerate(flat) :
-        out[i, f] = 1
-    return out
 
 def sample_cube(cube, k) :
     """
@@ -46,6 +37,7 @@ def sample_cube(cube, k) :
     return k, cube.cube
 
 def make_samples(cube, n_samples=10, k_depth=3) :
+    # NB samples are converted to vector representation of cube.  i.e. flattened.
         X = []
         Y = []
         for k in range(k_depth+1) :
@@ -53,7 +45,7 @@ def make_samples(cube, n_samples=10, k_depth=3) :
             for i in range(n_samples) :
             # generate n_samples of cubes
                 y, A = sample_cube(cube, k)
-                vector_A = vector_cube(A)
+                vector_A = A.vector_cube()
                 X.append(deepcopy(vector_A))
                 Y.append(y)
 
@@ -81,7 +73,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.10, random
 
 #inputs = keras.Input(shape=(6,3,3), name="cubes")
 #hidden_1 = layers.Flatten()(inputs)
-inputs = keras.Input(shape=(54,6), name="cubes")
+inputs = keras.Input(shape=(54,1), name="cubes")
 hidden_2 = layers.Dense(8192, activation="relu", name="dense_1")(inputs)
 hidden_3 = layers.Dense(1024, activation="relu", name="dense_2")(hidden_2)
 hidden_4 = layers.Dense(512, activation="relu", name="dense_3")(hidden_3)

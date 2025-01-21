@@ -49,22 +49,23 @@ class Cube :
             self.cube[f] = f
         self.entropy = 0
         
-    def vector_cube(self, cube) :
+    def vector_cube(self) :
         """ returns some kind of vector representation of cube
         with each row = a face and each col = colour 1 or 0
         """
-        flat = np.reshape(cube, (-1))
-        out = np.zeros((len(flat),max(flat)+1))
-        for i, f in enumerate(flat) :
-            out[i, f] = 1
+#        flat = np.reshape(self.cube, (-1))
+#        out = np.zeros((len(flat),max(flat)+1))
+#        for i, f in enumerate(flat) :
+#            out[i, f] = 1
+        out = self.cube.flatten()
         return out
 
     def matrix_dist(self) :    
         cube0=np.zeros((6,3,3), dtype=int)
         for f in range(6):
             cube0[f] = f
-        cube0 = self.vector_cube(cube0)
-        cube1 = self.vector_cube(self.cube)
+        cube0 = cube0.flatten()
+        cube1 = self.vector_cube()
         dist = np.linalg.norm(cube1-cube0)
         return dist
 
@@ -333,19 +334,27 @@ class Cube :
             self.rotate(r)
         self.update_entropy()
 
-    def rand_move(self, n) :
+    def rand_move(self, k) :
         """
-        to do: incorporate this logic to get random moves without repetition of faces.
+        Generate a move with rotations to depth k
+        """
+        
         move = []
-        i = 0
-        while i < k :
-            move.extend(mycube.rand_move(3))
-            move = cube.compress_moves( move )
-            i = len(move)
-        move = move[:k]
-        """
+        while len(move) < k :
+            if len(move) > 0 :
+                # avoid valid rotates on the same face to stop redundancy
+                last_r = move[-1]
+                next_valids = []
+                for v in self.valid_rotates :
+                    if v[0] != last_r[0] :
+                        next_valids.append(v)
+            else :
+                next_valids = self.valid_rotates
+        
+            move.append(np.random.choice(next_valids).tolist())
+        
 
-        return np.random.choice(self.valid_rotates, size=n).tolist()
+        return move
     
     def compress_moves(self, in_move) :
         """
