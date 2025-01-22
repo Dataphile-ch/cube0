@@ -39,6 +39,7 @@ Perhaps there is insufficient information in the cube to determine it's state.  
 # To do
 * Re-do NN training.  Using the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
 * Re-implement MCTS using distance estimated from NN.
+* Use a hard-coded voting algorithm instead of the NN.
 
 # References
 https://paperswithcode.com/paper/solving-the-rubiks-cube-with-approximate
