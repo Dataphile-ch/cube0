@@ -23,8 +23,8 @@ mycube.reset()
 
 #%% Procedure Section
 
-n = 500 # number of samples
-k = 20 # sample depth
+n = 300 # number of samples
+k = 12 # sample depth
 method = 'align'
 
 results = np.zeros((n,k))
