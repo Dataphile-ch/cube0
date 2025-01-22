@@ -216,6 +216,7 @@ class Cube :
             self.entropy = self.matrix_dist()
         else :
             print("Invalid Entropy Style")
+        return self.entropy
         
     def rotate(self, r, level=1) :
         
