@@ -30,8 +30,7 @@ Several definitions of cube entropy are evaluated:
 * Naive entropy: count the number of "stickers" that are on the wrong face.
 * Alignment entropy: based on the observation that corner and edge cubelets need to be aligned before they can be moved into place, how many alignments are there in the cube?
 * Matrix entropy: use a linear algebra distance norm to calculate the distance between the current cube and the solved cube in matrix/vector form.
-* Neural Network entropy: train a neural network on different cubes at different numbers of moves from solved.  The NN can then try to fit any given cube and estimate the number of moves to solve.
-
+The entropy is then used to estimate the reward function, which is the distance to the solved state.  In the fully developed solver, the reward function is estimated using a NN trained on the entropy measures as features.
 # Some Thoughts
 Is it actually possible to estimate entropy (the distance from a given cube to solved state)?
 
