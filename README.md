@@ -16,7 +16,7 @@ The Cube() class creates an object with an internal representation (6x3x3 matrix
 * Face: A cube has 6 faces: Right, Left, Up, Down, Front, Back [R,L,U,D,F,B], which have colours red, orange, white, yellow, green, blue.
 * Facelet/Sticker: each face has 3x3=9 squares which have coloured stickers in the original Rubik's cube.
 * Cubelet: what actually gets moved are the cubelets, either an edge cubelet (with 2 stickers) or a corner cubelet (with 3 stickers).  In case it's not obvious, the centre cubelets on each face don't move relative to eachother in a 3x3x3 cube, so they define the target colour for each face.
-* Rotation: Each face can be rotated 1, 2, or 3 times.  4 times returns to the original position, so is a non-move.
+* Rotation: Each face can be rotated 1, 2, or 3 times.  4 times returns to the original position, so is a non-move.  Some solvers consider each 90° separately, so a 180° rotation is 2 rotations, but this approach makes it more difficult to elminate redundant rotations and therefore introduces a source of error.
 * Move: A move is a sequence of rotations.  e.g. R2, U1, D3
 # Solving Method
 The cube is solved using the MCTS algorithm (Monte-Carlo Tree Search).  This is the same basic algorithm used for most game solvers.
