@@ -53,10 +53,6 @@ class Cube :
         """ returns some kind of vector representation of cube
         with each row = a face and each col = colour 1 or 0
         """
-#        flat = np.reshape(self.cube, (-1))
-#        out = np.zeros((len(flat),max(flat)+1))
-#        for i, f in enumerate(flat) :
-#            out[i, f] = 1
         out = self.cube.flatten()
         return out
 
@@ -357,26 +353,16 @@ class Cube :
 
         return move
     
-    def compress_moves(self, in_move) :
+    def get_reward(self) :
         """
-        Helper function to remove redundant moves from a seq.
-        e.g. B1, B1 -> B2
-        e.g. B2, B2 -> null
+        Returns: estimate of the distance from this state to solved state.
+        i.e. number of rotations needed
+        -------
+        To do: estimate reward from different entropy functions.
+        Maybe combine using weighted voting.
+        Or : implement as NN
         """
-        in_move = list(in_move)
-        out_move = []
-        while len(in_move) > 0 :
-            r = in_move.pop(0)
-            face = r[0]
-            rotates = int(r[1])
-            while len(in_move) != 0 and face == in_move[0][0] :
-                next_r = in_move.pop(0)
-                rotates += int(next_r[1])
-    
-            if rotates % 4 != 0 :
-                out_move.append(face + str(rotates % 4))
-    
-        return out_move
+        return 1
 
         
     def show_cube(self) :

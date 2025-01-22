@@ -89,7 +89,7 @@ max_moves=16
 mycube = Cube()
 mycube.reset()
 
-scramble = mycube.compress_moves(mycube.rand_move(rand_moves))
+scramble = mycube.rand_move(rand_moves)
 mycube.move(scramble)
 rev = mycube.reverse_moves
 mycube.show_cube()
@@ -98,4 +98,4 @@ print(" Reverse Moves: ", rev)
 
 solve_entropy, solve_moves = solve_cube(mycube, max_depth=max_depth, max_moves=max_moves)
 mycube.show_cube()
-print("   Solve Moves: ", mycube.compress_moves(solve_moves))
+print("   Solve Moves: ", solve_moves)
