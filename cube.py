@@ -26,10 +26,12 @@ class Cube :
         self.faces = ['U', 'L', 'F', 'R', 'B', 'D']
             
         # The cube is represented as 6 faces with 3x3 stickers or facelets
-        self.cube=np.zeros((6,3,3), dtype=int)
+        self.solved_cube=np.zeros((6,3,3), dtype=int)
         # initialize the colours on each face
         for f in range(6):
-            self.cube[f] = f
+            self.solved_cube[f] = f
+        
+        self.cube = np.copy(self.solved_cube)
 
         self.entropy = 0
         self.valid_rotates = ['R1', 'R2', 'R3', 'L1', 'L2', 'L3', \
@@ -39,15 +41,17 @@ class Cube :
                             'U3', 'U2', 'U1', 'D3', 'D2', 'D1', \
                             'F3', 'F2', 'F1', 'B3', 'B2', 'B1']
         self.moves = []
-        self.reverse_moves = []
+        # to  get reverse moves, use: self.moves[::-1]
         
         self.pred_model = keras.models.load_model("nn_entropy.keras")
         
     def reset(self) :
         # initialize the colours on each face
-        for f in range(6):
-            self.cube[f] = f
+        self.cube = np.copy(self.solved_cube)
         self.entropy = 0
+
+    def is_solved(self) :
+        return (self.cube == self.solved_cube).all()
         
     def vector_cube(self) :
         """ returns some kind of vector representation of cube
@@ -57,10 +61,7 @@ class Cube :
         return out
 
     def matrix_dist(self) :    
-        cube0=np.zeros((6,3,3), dtype=int)
-        for f in range(6):
-            cube0[f] = f
-        cube0 = cube0.flatten()
+        cube0 = self.solved_cube.flatten()
         cube1 = self.vector_cube()
         dist = np.linalg.norm(cube1-cube0)
         return dist
@@ -71,10 +72,7 @@ class Cube :
 
     def naive_entropy(self) :
         # For now, this is just counting the number of misplaced or misoriented cubelets.
-        entropy = 0
-        for f in range (6) :
-            A = np.zeros((3,3), dtype=int) + f
-            entropy += np.sum(self.cube[f] != A)
+        entropy = (self.cube != self.solved_cube).sum()
         return entropy
                     
     def align_entropy(self) :
@@ -322,8 +320,6 @@ class Cube :
             
         if level ==1 :
             self.moves.append(r)
-            reverse =self.inverse_rotates[self.valid_rotates.index(r)]
-            self.reverse_moves.insert(0, reverse)
 
     def move(self, m) :
         # m is an array of valid rotations
@@ -361,8 +357,15 @@ class Cube :
         To do: estimate reward from different entropy functions.
         Maybe combine using weighted voting.
         Or : implement as NN
+        
+        Initial implementation is just a dumb re-scaling of naive entropy score.
         """
-        return 1
+        e = self.update_entropy(style='naive')
+        if e == 0 :
+            reward = e
+        else:
+            reward = (e-9)*20/54
+        return reward
 
         
     def show_cube(self) :
