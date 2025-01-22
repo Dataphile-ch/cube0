@@ -2,11 +2,13 @@
 Explore empirical methods for solving the 3x3x3 Rubik's Cube.
 
 # Why?
-The cube can be scrambled in a few moves.  The number called "God's number" for the cube is proved to be 20 https://cube20.org/#:~:text=At%20long%20last%2C%20God's%20Number,moves%20suffice%20for%20all%20positions.
-So, no cube can be more that 20 moves from the solved state.
+The cube can be scrambled in a few rotations.  The upper bound on the number of rotations to solve from any state is known as "God's number" and is proved to be 20 https://cube20.org/#:~:text=At%20long%20last%2C%20God's%20Number,moves%20suffice%20for%20all%20positions.
+So, no cube can be more that 20 rotations from the solved state.
 
-Current solving strategies rely on pattern recognition, step-by-step solving, and memorizing (or programming) up to 100 "algorithms" to move from 1 step to the next.  The most common strategy in speed cubing is CFOP https://jperm.net/3x3/cfop
+Current human solving strategies rely on pattern recognition, step-by-step solving, and memorizing (or programming) up to 100 "algorithms" to move from 1 step to the next.  The most common strategy in speed cubing is CFOP https://jperm.net/3x3/cfop
 These strategies typically take at least 40-50 moves to solve a cube, at least 2-3x as many as necessary.
+
+AI researchers have had fun training models to find optimal solutions, but often these take longer than the human methods and consume large resources (CPU and memory).
 
 > Is it possible to quickly find a minimal set of moves to solve any cube?
 # Concepts
