@@ -5,6 +5,7 @@ from matplotlib import colors
 import numpy as np
 import tensorflow.keras as keras
 
+
 class Cube :
     """
     Terminology:
@@ -377,6 +378,21 @@ class Cube :
 
         return move
     
+    def get_possible_actions(self, parent_action=None) :
+        """
+        Return possible next rotations, without repeating a rotation on the same face
+        as the parent.
+        The default action 'XX' will return a list of all valid rotates, as a copy.
+        """
+        if not parent_action :
+            parent_action = 'XX'
+        last_face = parent_action[0]
+        possible_actions = []
+        for v in self.valid_rotates :
+            if v[0] != last_face :
+                possible_actions.append(v)
+        return possible_actions
+
         
     def show_cube(self) :
     
