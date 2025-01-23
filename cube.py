@@ -60,7 +60,9 @@ class Cube :
         out = self.cube.flatten()
         return out
 
-    def matrix_dist(self) :    
+    def matrix_dist(self) :
+        # Euclidian distance to solved state
+        # range: 6-22
         cube0 = self.solved_cube.flatten()
         cube1 = self.vector_cube()
         dist = np.linalg.norm(cube1-cube0)
@@ -72,11 +74,13 @@ class Cube :
 
     def naive_entropy(self) :
         # For now, this is just counting the number of misplaced or misoriented cubelets.
+        # range: 12 - 54
         entropy = (self.cube != self.solved_cube).sum()
         return entropy
                     
     def align_entropy(self) :
         # A measure based on alignment of corners and edges, which is always a step towards solved state.
+        # range: 8 - 32
         max_entropy = 8*4
         align = 0
                 
@@ -211,7 +215,31 @@ class Cube :
         else :
             print("Invalid Entropy Style")
         return self.entropy
+    
+    def estimate_distance(self) :
+        # estimate the number of moves to solved state
+        # range: 1-20
+        # simple linear rescaling of entropy measures with weighted average
+        if self.is_solved() :
+            return 0
+        e1 = (self.align_entropy() -8 ) *20/32
+        e2 = (self.naive_entropy() -12) *20/54
+        e3 = (self.matrix_dist() -6) *20/22
+        values = np.array([e1,e2,e3])
+        weights = [3,1,1]
+        w_avg = np.average(values, weights=weights)
+        return w_avg
         
+    def get_reward(self) :
+        """
+        Returns: estimate of the distance from this state to solved state.
+        i.e. number of rotations needed
+        -------
+        To do: implement as NN inference from features
+        
+        """
+        return self.estimate_distance()
+
     def rotate(self, r, level=1) :
         
         def rotate_face(f) :
@@ -349,24 +377,6 @@ class Cube :
 
         return move
     
-    def get_reward(self) :
-        """
-        Returns: estimate of the distance from this state to solved state.
-        i.e. number of rotations needed
-        -------
-        To do: estimate reward from different entropy functions.
-        Maybe combine using weighted voting.
-        Or : implement as NN
-        
-        Initial implementation is just a dumb re-scaling of naive entropy score.
-        """
-        e = self.update_entropy(style='naive')
-        if e == 0 :
-            reward = e
-        else:
-            reward = (e-9)*20/54
-        return reward
-
         
     def show_cube(self) :
     
