@@ -66,9 +66,11 @@ class TreeHorn :
         return len(self._untried_actions) == 0
     
     def best_child(self, explore_param=0.1):
-        
+        """
+        Find a child node to explore, using exploitation vs exploration
+        """
         if not self.children :
-            return None
+            raise Exception("Attempt to find children before expanding")
         
         choices_weights = [(c.reward / c.num_visits) + \
                             explore_param * np.sqrt(2 * np.log(self.num_visits / c.num_visits)) \
@@ -79,10 +81,12 @@ class TreeHorn :
         """
         Get an untried action, create child node with new state from that action.
         """
+        if len(self._untried_actions) == 0 :
+            raise Exception("Attempt to expand fully-expanded node")
         rand_action_idx = randint(0, len(self._untried_actions) - 1)
         action = self._untried_actions.pop(rand_action_idx)
         next_state = deepcopy(self.state)
-        next_state.rotate(action) 
+        next_state.move([action]) 
         child_node = TreeHorn(next_state, parent=self, parent_action=action)
         
         self.children.append(child_node)
@@ -117,10 +121,11 @@ class TreeHorn :
         if self.parent:
             self.parent.backpropagate(self.best_reward, self.parent_action)
 
-    def rollout(self, max_depth=4):
+    def rollout(self, max_depth=3):
         """
         This does the business of searching down a random path from the current state.
         Stop search at max_depth because we are almost certain not to find a solved cube
+        PROBLEM : 1 random search is unlikely to find the right path
         """
         
         current_rollout_state = deepcopy(self.state) 
@@ -131,11 +136,11 @@ class TreeHorn :
             possible_moves = current_rollout_state.get_possible_actions()
             
             rand_action_idx = randint(0, len(possible_moves) - 1)
-            action = [possible_moves[rand_action_idx]]
+            action = possible_moves[rand_action_idx]
             if depth == 0 :
                 first_action = action
 
-            current_rollout_state.move(action)
+            current_rollout_state.move([action])
             depth += 1
         return (current_rollout_state.get_reward(), first_action)
     
@@ -143,6 +148,7 @@ class TreeHorn :
         """
         pick a node, find a possible reward, backpropogate.
         repeat n times, and then return the best child.
+        PROBLEM: we never recursively search the best child.
         """
         for i in range(trials):
             v = self.tree_policy() # get a node to try
