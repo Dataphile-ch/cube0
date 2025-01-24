@@ -38,9 +38,6 @@ class Cube :
         self.valid_rotates = ['R1', 'R2', 'R3', 'L1', 'L2', 'L3', \
                             'U1', 'U2', 'U3', 'D1', 'D2', 'D3', \
                             'F1', 'F2', 'F3', 'B1', 'B2', 'B3']
-        self.inverse_rotates = ['R3', 'R2', 'R1', 'L3', 'L2', 'L1', \
-                            'U3', 'U2', 'U1', 'D3', 'D2', 'D1', \
-                            'F3', 'F2', 'F1', 'B3', 'B2', 'B1']
         self.moves = []
         # to  get reverse moves, use: self.moves[::-1]
         
