@@ -10,11 +10,12 @@ from cube import Cube
 from mcts import TreeHorn
 
 rubiks = Cube()
-rubiks.move(rubiks.rand_move(3))
+rubiks.move(rubiks.rand_move(4))
 root = TreeHorn(rubiks)
 
 #%% Solve
-best_child = root.v_search(50)
+iterations = 5000
+best_child = root.v_search(iterations)
 if root.best_reward == 0 :
     print('Cube solved!')
     print('Scramble moves: \t', root.state.moves)
@@ -24,5 +25,8 @@ if root.best_reward == 0 :
         path = path.best_child()
         solve_moves.append(path.parent_action)
     print('Solve moves: \t', solve_moves)
+else :
+    print('Not solved!')
+    print('Scramble moves: \t', root.state.moves)
 
 

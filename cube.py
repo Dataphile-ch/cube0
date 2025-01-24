@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-import tensorflow.keras as keras
+#import tensorflow.keras as keras
 
 
 class Cube :
@@ -41,7 +41,7 @@ class Cube :
         self.moves = []
         # to  get reverse moves, use: self.moves[::-1]
         
-        self.pred_model = keras.models.load_model("nn_entropy.keras")
+#        self.pred_model = keras.models.load_model("nn_entropy.keras")
         
     def reset(self) :
         # initialize the colours on each face
@@ -67,8 +67,9 @@ class Cube :
         return dist
 
     def nn_entropy(self) :
-        pred = self.pred_model.predict(np.reshape(self.cube, (1,6,3,3)))
-        return pred.argmax()
+        return self.matrix_dist()
+#        pred = self.pred_model.predict(np.reshape(self.cube, (1,6,3,3)))
+#       return pred.argmax()
 
     def naive_entropy(self) :
         # For now, this is just counting the number of misplaced or misoriented cubelets.
