@@ -45,11 +45,10 @@ class TreeHorn :
         self.best_reward = 20 # I think I need this ...
         self.best_action = None
         self.children = [] # should be node + action
-        self.num_visits = 0
+        self.num_visits = 1 # initialize to 1 to stop div0 errors
         
         # Some cube-specific stuff.  Probably should be in a separate class...
-        self._untried_actions = None
-        self._untried_actions = self.state.get_possible_actions(parent_action)
+        self.possible_actions = self.state.get_possible_actions(parent_action)
 
         return
     
@@ -63,7 +62,7 @@ class TreeHorn :
         return (self.state.cube == self.state.solved_cube).all()
     
     def is_fully_expanded(self):
-        return len(self._untried_actions) == 0
+        return ( len(self.children) == len(self.possible_actions) )
     
     def best_child(self, explore_param=0.1):
         """
@@ -72,40 +71,43 @@ class TreeHorn :
         if not self.children :
             raise Exception("Attempt to find children before expanding")
         
-        choices_weights = [(c.reward / c.num_visits) + \
-                            explore_param * np.sqrt(2 * np.log(self.num_visits / c.num_visits)) \
-                                                    for c in self.children]
+#        choices_weights = [((20-c.reward) / c.num_visits) + \
+#                            explore_param * np.sqrt(2 * np.log(self.num_visits / c.num_visits)) \
+#                                                    for c in self.children]
+        choices_weights = [(20-c.reward) for c in self.children]
+        
         return self.children[np.argmax(choices_weights)]
     
     def expand(self):
         """
-        Get an untried action, create child node with new state from that action.
+        Create child nodes with new state from all possible actions.
         """
-        if len(self._untried_actions) == 0 :
+        if self.is_fully_expanded() :
             raise Exception("Attempt to expand fully-expanded node")
-        rand_action_idx = randint(0, len(self._untried_actions) - 1)
-        action = self._untried_actions.pop(rand_action_idx)
-        next_state = deepcopy(self.state)
-        next_state.move([action]) 
-        child_node = TreeHorn(next_state, parent=self, parent_action=action)
-        
-        self.children.append(child_node)
-        return child_node         
+        if self.is_terminal_node() :
+            raise Exception("Attempt to expand a solved cube")
+
+        for a in self.possible_actions :
+            next_state = deepcopy(self.state)
+            next_state.move([a]) # ??
+            child_node = TreeHorn(next_state, parent=self, parent_action=a)
+            self.children.append(child_node)
+        return True
 
     def tree_policy(self):
         """
-        select the next node for rollout.  Either an untried node, or the best child
-        from the current node.
-        NB. Doesn't return best child if that node is terminal ?!
+        select the next node for rollout.  Search recursively down the tree using "best child".
+        when we get to an unexpanded node, expand it and return.
+        NB. Doesn't return best child if this node is terminal ?!
         """
     
         current_node = self
-        while not current_node.is_terminal_node():
-            
-            if not current_node.is_fully_expanded():
-                return current_node.expand()
-            else:
-                current_node = current_node.best_child()
+        while current_node.is_fully_expanded() :  # go recursively down the tree
+            current_node = current_node.best_child()
+
+        if not current_node.is_terminal_node() :
+            current_node.expand()
+
         return current_node
 
     def backpropagate(self, reward, action):
@@ -123,27 +125,18 @@ class TreeHorn :
 
     def rollout(self, max_depth=3):
         """
-        This does the business of searching down a random path from the current state.
-        Stop search at max_depth because we are almost certain not to find a solved cube
-        PROBLEM : 1 random search is unlikely to find the right path
+        This will normally simulate the game until it finds a solved state.
+        However, for the cube problem, we will only simulate the next leve.
+        i.e. we just need to get the reward and action for the best child.
+        
+        May be improved by searching down 2-3 layers for best reward, 
+        if this can be done cheaply.
         """
         
-        current_rollout_state = deepcopy(self.state) 
-        depth = 0
-        first_action = []
-        while not current_rollout_state.is_solved() and depth < max_depth:
+        best = self.best_child(explore_param=0.0)
+        
+        return best.reward, best.parent_action
             
-            possible_moves = current_rollout_state.get_possible_actions()
-            
-            rand_action_idx = randint(0, len(possible_moves) - 1)
-            action = possible_moves[rand_action_idx]
-            if depth == 0 :
-                first_action = action
-
-            current_rollout_state.move([action])
-            depth += 1
-        return (current_rollout_state.get_reward(), first_action)
-    
     def v_search(self, trials = 100):
         """
         pick a node, find a possible reward, backpropogate.
@@ -154,5 +147,7 @@ class TreeHorn :
             v = self.tree_policy() # get a node to try
             reward, action = v.rollout() # possible reward from that node
             v.backpropagate(reward, action)
+            if reward == 0 :
+                break
 	
-        return self.best_child(explore_param=0.)
+        return self.best_child(explore_param=0.0)
