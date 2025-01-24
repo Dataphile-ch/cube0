@@ -220,9 +220,12 @@ class Cube :
         # simple linear rescaling of entropy measures with weighted average
         if self.is_solved() :
             return 0
-        e1 = (self.align_entropy() -8 ) *20/32
-        e2 = (self.naive_entropy() -12) *20/54
-        e3 = (self.matrix_dist() -6) *20/22
+        e1 = self.align_entropy() 
+        e1 = np.interp(e1, [8,32], [1,20])
+        e2 = self.naive_entropy()
+        e2 = np.interp(e2, [12,54], [1,20])
+        e3 = self.matrix_dist()
+        e3 = np.interp(e3, [6,22], [1,20])
         values = np.array([e1,e2,e3])
         weights = [3,1,1]
         w_avg = np.average(values, weights=weights)
