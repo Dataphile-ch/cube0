@@ -64,7 +64,7 @@ class TreeHorn :
     def is_fully_expanded(self):
         return ( len(self.children) == len(self.possible_actions) )
     
-    def best_child(self, explore_param=0.1):
+    def best_child(self, explore_param=0.2):
         """
         Find a child node to explore, using exploitation vs exploration
         TO DO: this is too deterministic, the search keeps going deeper down the same path
@@ -72,12 +72,15 @@ class TreeHorn :
         if not self.children :
             raise Exception("Attempt to find children before expanding")
         
-#        choices_weights = [((20-c.reward) / c.num_visits) + \
-#                            explore_param * np.sqrt(2 * np.log(self.num_visits / c.num_visits)) \
-#                                                    for c in self.children]
-        choices_weights = [(20-c.reward) for c in self.children]
-        
-        return self.children[np.argmax(choices_weights)]
+        # select either the best child, or a random child node
+        if np.random.choice([0,1],p=[explore_param,1-explore_param]) :
+            # exploit
+            choices_weights = [(20-c.best_reward) for c in self.children]        
+            return self.children[np.argmax(choices_weights)]
+        else :
+            # explore
+            rand_child = np.random.choice(len(self.children))
+            return self.children[rand_child]
     
     def expand(self):
         """
@@ -151,4 +154,4 @@ class TreeHorn :
             if reward == 0 :
                 break
 	
-        return self.best_child(explore_param=0.0)
+        return reward == 0
