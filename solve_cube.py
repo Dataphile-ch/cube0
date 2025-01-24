@@ -10,7 +10,7 @@ from cube import Cube
 from mcts import TreeHorn
 
 rubiks = Cube()
-rubiks.move(rubiks.rand_move(4))
+rubiks.move(rubiks.rand_move(3))
 root = TreeHorn(rubiks)
 
 #%% Solve

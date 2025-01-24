@@ -67,6 +67,7 @@ class TreeHorn :
     def best_child(self, explore_param=0.1):
         """
         Find a child node to explore, using exploitation vs exploration
+        TO DO: this is too deterministic, the search keeps going deeper down the same path
         """
         if not self.children :
             raise Exception("Attempt to find children before expanding")

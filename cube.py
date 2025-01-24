@@ -41,8 +41,6 @@ class Cube :
         self.moves = []
         # to  get reverse moves, use: self.moves[::-1]
         
-#        self.pred_model = keras.models.load_model("nn_entropy.keras")
-        
     def reset(self) :
         # initialize the colours on each face
         self.cube = np.copy(self.solved_cube)
@@ -65,11 +63,6 @@ class Cube :
         cube1 = self.vector_cube()
         dist = np.linalg.norm(cube1-cube0)
         return dist
-
-    def nn_entropy(self) :
-        return self.matrix_dist()
-#        pred = self.pred_model.predict(np.reshape(self.cube, (1,6,3,3)))
-#       return pred.argmax()
 
     def naive_entropy(self) :
         # For now, this is just counting the number of misplaced or misoriented cubelets.
@@ -207,8 +200,6 @@ class Cube :
             self.entropy = self.align_entropy() 
         elif style == 'naive' :
             self.entropy = self.naive_entropy()
-        elif style == 'nn' :
-            self.entropy = self.nn_entropy()
         elif style == 'matrix' :
             self.entropy = self.matrix_dist()
         else :
