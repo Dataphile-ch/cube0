@@ -9,6 +9,7 @@ Created on Thu Jan 23 15:46:34 2025
 from cube import Cube
 from mcts import TreeHorn
 import time
+from ast import literal_eval
 
 #%% Functions
 
@@ -23,11 +24,10 @@ def inverse_move(moves) :
     inverse_rotates = inverse_rotates[::-1]
     return inverse_rotates
 
-
 #%% Solve
 iterations = 100000
-explore_param = 0.5
-scrambles = 8
+explore_param = 0.1
+scrambles = 10
 
 rubiks = Cube()
 rubiks.move(rubiks.rand_move(scrambles))
