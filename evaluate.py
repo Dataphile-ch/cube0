@@ -12,6 +12,7 @@ from cube import Cube
 from mcts import TreeHorn
 from ast import literal_eval
 from csv import writer
+from tqdm import tqdm
 
 #%% Functions
 
@@ -24,7 +25,8 @@ samples = 50 # how many samples at each scramble level
 
 results = []
 for s in scrambles :
-    for n in range(samples) :
+    print(f'Level: {s}')
+    for n in tqdm(range(samples)) :
         rubiks = Cube()
         rubiks.move(rubiks.rand_move(s))
         root = TreeHorn(rubiks, iterations=iterations, explore_param=explore_param)
