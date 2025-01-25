@@ -25,7 +25,7 @@ def inverse_move(moves) :
 
 
 #%% Solve
-iterations = 100000
+iterations = 100,000
 explore_param = 1
 scrambles = 8
 
