@@ -6,13 +6,14 @@ Created on Wed Jan 22 13:12:02 2025
 @author: william
 
 Implement the MCTS algorithm for cube solving.
+TO DO:
+    Consider using num_visits to de-weight nodes that have been visited too often.
 
 """
 
 #%% Packages
 import numpy as np
 from cube import Cube
-from random import randint
 from copy import deepcopy
 
 #%% Functions
@@ -25,14 +26,14 @@ class TreeHorn :
     https://thebiglebowski.fandom.com/wiki/Jackie_Treehorn
     
     A round consists of 
-    Select - get best child using exploration vs exploitation
+    Select - get best unexpanded node using exploration vs exploitation
     Expand - find all child nodes, up to level k
     Simulate - get rewards for child states
     Backpropogation - propogate best reward to all parents
 
     State representation for Cube: the 6x3x3 matrix from Cube.cube
 
-    Reward function for Cube: estimated number of moves from solved state.
+    Reward function for Cube: estimated distance from solved state.
     For the Cube, there is only 1 solved state so we don't cumulate rewards from different policies (as in some MCTS examples)
     
     """
@@ -47,10 +48,8 @@ class TreeHorn :
         self.reward = self.state.get_reward()
         self.best_reward = self.reward
         self.best_action = None
-        self.children = [] # should be node + action
+        self.children = [] 
         self.num_visits = 1 # initialize to 1 to stop div0 errors
-        
-        # Some cube-specific stuff.  Probably should be in a separate class...
         self.possible_actions = self.state.get_possible_actions(parent_action)
 
         return
@@ -145,7 +144,6 @@ class TreeHorn :
         """
         select the next node for rollout.  Search recursively down the tree using "best child".
         when we get to an unexpanded node, expand it and return.
-        NB. Doesn't return best child if this node is terminal ?!
         """
     
         current_node = self
@@ -191,7 +189,6 @@ class TreeHorn :
         """
         pick a node, find a possible reward, backpropogate.
         repeat n times, and then return the best child.
-        PROBLEM: we never recursively search the best child.
         """
         for i in range(self.iterations):
             v = self.tree_policy() # get a node to try
