@@ -70,16 +70,16 @@ class TreeHorn :
     def __str__(self) :
         d,c = self.traverse()
         r = self.best_reward
-        s = f'Total children:\t {c}\n' + \
+        s = f'Total children:\t {c:,}\n' + \
             f'Max depth:\t\t {d}\n' + \
-                f'Max reward:\t\t {r}'
+                f'Max reward:\t\t {r:.3f}'
         return s
     
     def __repr__(self) :
         d,c = self.traverse()
         r = self.best_reward
         s = self.is_terminal_node()
-        return f'({s},{c},{d},{r})'
+        return f'({s},{c},{d},{r:.3f})'
     
     def softmax(self, X : np.array, theta=1) :
         X = X / theta

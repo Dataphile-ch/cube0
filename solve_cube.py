@@ -25,8 +25,8 @@ def inverse_move(moves) :
 
 
 #%% Solve
-iterations = 100,000
-explore_param = 1
+iterations = 100000
+explore_param = 0.5
 scrambles = 8
 
 rubiks = Cube()
