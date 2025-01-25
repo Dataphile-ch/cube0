@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 from matplotlib import colors
 import numpy as np
-import tensorflow.keras as keras
+#import tensorflow.keras as keras
 
 
 class Cube :
@@ -41,8 +41,6 @@ class Cube :
         self.moves = []
         # to  get reverse moves, use: self.moves[::-1]
         
-        self.pred_model = keras.models.load_model("nn_entropy.keras")
-        
     def reset(self) :
         # initialize the colours on each face
         self.cube = np.copy(self.solved_cube)
@@ -65,10 +63,6 @@ class Cube :
         cube1 = self.vector_cube()
         dist = np.linalg.norm(cube1-cube0)
         return dist
-
-    def nn_entropy(self) :
-        pred = self.pred_model.predict(np.reshape(self.cube, (1,6,3,3)))
-        return pred.argmax()
 
     def naive_entropy(self) :
         # For now, this is just counting the number of misplaced or misoriented cubelets.
@@ -206,8 +200,6 @@ class Cube :
             self.entropy = self.align_entropy() 
         elif style == 'naive' :
             self.entropy = self.naive_entropy()
-        elif style == 'nn' :
-            self.entropy = self.nn_entropy()
         elif style == 'matrix' :
             self.entropy = self.matrix_dist()
         else :
@@ -215,20 +207,6 @@ class Cube :
         return self.entropy
     
     def estimate_distance(self) :
-        # estimate the number of moves to solved state
-        # range: 1-20
-        # simple linear rescaling of entropy measures with weighted average
-        if self.is_solved() :
-            return 0
-        e1 = (self.align_entropy() -8 ) *20/32
-        e2 = (self.naive_entropy() -12) *20/54
-        e3 = (self.matrix_dist() -6) *20/22
-        values = np.array([e1,e2,e3])
-        weights = [3,1,1]
-        w_avg = np.average(values, weights=weights)
-        return w_avg
-        
-    def get_reward(self) :
         """
         Returns: estimate of the distance from this state to solved state.
         i.e. number of rotations needed
@@ -236,7 +214,30 @@ class Cube :
         To do: implement as NN inference from features
         
         """
-        return self.estimate_distance()
+        # estimate the number of moves to solved state
+        # range: 1-20
+        # simple linear rescaling of entropy measures with weighted average
+        if self.is_solved() :
+            return 0
+        e1 = self.align_entropy() 
+        e1 = np.interp(e1, [8,32], [1,20])
+        e2 = self.naive_entropy()
+        e2 = np.interp(e2, [12,54], [1,20])
+        e3 = self.matrix_dist()
+        e3 = np.interp(e3, [6,22], [1,20])
+        values = np.array([e1,e2,e3])
+        weights = [3,1,1]
+        w_avg = np.average(values, weights=weights)
+        return w_avg
+        
+    def get_reward(self) :
+        """
+        Convert the distance estimate to a reward function.
+        MCTS is assuming (discounted) +-1 rewards from win/loss states
+        We only have 1 reward state, and a distance estimate [0-20]
+        1/(Di+1) is a (0-1] reward function.  Some shifting and scaling re-balances the value of nodes        
+        """
+        return (10/(self.estimate_distance()+10))
 
     def rotate(self, r, level=1) :
         
