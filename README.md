@@ -40,7 +40,7 @@ Node playout or rollout in MCTS plays from the selected node until an end state 
 # Some Thoughts
 Is it actually possible to estimate entropy (the distance from a given cube to solved state)?
 
-Perhaps there is insufficient information in the cube to determine it's state.  What would this mean?  If you try to solve a cube by examining and un-doing moves, you can find the solution for up to 4-5 rotations, but beyond that it becomes very difficult to sed the reverse moves.  Does this mean that the cube really does have something like entropy and tends to a random state where information about the original structure (solved state) is no longer available??
+Perhaps there is insufficient information in the cube to determine it's state.  What would this mean?  If you try to solve a cube by examining and un-doing moves, you can find the solution for up to 4-5 rotations, but beyond that it becomes very difficult to see the reverse moves.  Does this mean that the cube really does have something like entropy and tends to a random state where information about the original structure (solved state) is no longer available??
 
 # To do
 * Consider the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
