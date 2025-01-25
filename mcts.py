@@ -45,7 +45,7 @@ class TreeHorn :
         self.explore_param = explore_param
 
         self.reward = self.state.get_reward()
-        self.best_reward = 1 # solved state
+        self.best_reward = self.reward
         self.best_action = None
         self.children = [] # should be node + action
         self.num_visits = 1 # initialize to 1 to stop div0 errors
@@ -69,7 +69,17 @@ class TreeHorn :
         
     def __str__(self) :
         d,c = self.traverse()
-        return f'Total children:\t {c}\nMax depth:\t {d}'
+        r = self.best_reward
+        s = f'Total children:\t {c}\n' + \
+            f'Max depth:\t\t {d}\n' + \
+                f'Max reward:\t\t {r}'
+        return s
+    
+    def __repr__(self) :
+        d,c = self.traverse()
+        r = self.best_reward
+        s = self.is_terminal_node()
+        return f'({s},{c},{d},{r})'
     
     def softmax(self, X : np.array, theta=1) :
         X = X / theta
@@ -82,7 +92,7 @@ class TreeHorn :
             return False
     
     def is_terminal_node(self):
-        return (self.state.cube == self.state.solved_cube).all()
+        return self.state.is_solved()
     
     def is_fully_expanded(self):
         return ( len(self.children) == len(self.possible_actions) )
@@ -100,8 +110,6 @@ class TreeHorn :
             add KL divergence to weight unvisited nodes.
             convert weights to probabilities using softmax
         """
-        if not explore_param : explore_param=self.explore_param
-        
         if not self.children :
             raise Exception("Attempt to find best child of unexpanded node")
 
@@ -112,6 +120,7 @@ class TreeHorn :
             return self.children[np.argmax(child_rewards)]
         else :
             # explore
+            if not explore_param : explore_param=self.explore_param        
             weights = self.softmax(child_rewards,explore_param)
             rand_child = np.random.choice(len(self.children), p=weights)
             return self.children[rand_child]
@@ -154,13 +163,13 @@ class TreeHorn :
                 
         """
         self.num_visits += 1.
-        if reward < self.best_reward :
+        if reward > self.best_reward :
             self.best_reward = reward
             self.best_action = action
         if self.parent:
             self.parent.backpropagate(self.best_reward, self.parent_action)
 
-    def rollout(self, max_depth=3):
+    def rollout(self):
         """
         This will normally simulate the game until it finds a solved state.
         However, for the cube problem, we will only simulate the next leve.
@@ -169,15 +178,12 @@ class TreeHorn :
         May be improved by searching down 2-3 layers for best reward, 
         if this can be done cheaply.
         """
-        
-        if self.children :
-            best = self.best_child(explore_param=0.0)
-            reward = best.reward
-            parent_action = best.parent_action
-        else :
-            reward = self.reward
-            parent_action = self.parent_action
-            
+        if self.is_terminal_node() or (not self.children):
+            raise Exception('Attempt to rollout from solved cube')
+
+        best = self.best_child(explore_param=0.0)
+        reward = best.reward
+        parent_action = best.parent_action
         
         return reward, parent_action
             
@@ -189,11 +195,9 @@ class TreeHorn :
         """
         for i in range(self.iterations):
             v = self.tree_policy() # get a node to try
-#            if v.is_terminal_node() :
-#                break
             reward, action = v.rollout() # possible reward from that node
             v.backpropagate(reward, action)
             if reward==1 :
                 break
 	
-        return v.is_terminal_node()
+        return (reward==1)

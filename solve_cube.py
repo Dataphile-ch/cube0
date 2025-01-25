@@ -8,6 +8,7 @@ Created on Thu Jan 23 15:46:34 2025
 #%% Setup
 from cube import Cube
 from mcts import TreeHorn
+import time
 
 #%% Functions
 
@@ -24,16 +25,20 @@ def inverse_move(moves) :
 
 
 #%% Solve
-iterations = 10000
-explore_param = 0.01
-scrambles = 4
+iterations = 100000
+explore_param = 1
+scrambles = 8
 
 rubiks = Cube()
 rubiks.move(rubiks.rand_move(scrambles))
 
 root = TreeHorn(rubiks, iterations=iterations, explore_param=explore_param)
 
+tic = time.time()
 solved = root.mcts_search()
+toc = time.time()
+elapsed = toc-tic
+
 if solved :
     print('Cube solved!')
 else :
@@ -47,5 +52,5 @@ while path.is_fully_expanded() :
     solve_moves.append(path.parent_action)
 print('Solve moves: \t', solve_moves)
 print(root)
-
+print(f'Working time: \t {int(elapsed/60):02d}:{int(elapsed%60):02d}')
 
