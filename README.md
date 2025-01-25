@@ -24,22 +24,26 @@ Because the space of possible moves is so vast, the algorithm has to be optimize
 
 The approach is to randomly explore possible moves down to a pre-defined depth, and then back-propogate a reward function.  Then the best move (or a random good move) is selected and we continue exploring until (hopefully) a solved state is found.
 # Reward Function
-The reward function is implemented inside the Cube() class as "entropy".  This term is almost certainly mis-used since all states of the cube are equally unlikely, but it is intended to represent "how far is this cube from the solved state".
+The reward function is implemented inside the Cube() class based on "entropy".  This term is almost certainly mis-used since all states of the cube are equally unlikely, but it is intended to represent "how far is this cube from the solved state".
 
 Several definitions of cube entropy are evaluated:
 * Naive entropy: count the number of "stickers" that are on the wrong face.
 * Alignment entropy: based on the observation that corner and edge cubelets need to be aligned before they can be moved into place, how many alignments are there in the cube?
 * Matrix entropy: use a linear algebra distance norm to calculate the distance between the current cube and the solved cube in matrix/vector form.
-The entropy is then used to estimate the reward function, which is the distance to the solved state.  In the fully developed solver, the reward function is estimated using a NN trained on the entropy measures as features.
+The entropy is then used to estimate the distance to the solved state.  The distance is then converted to a reward function in the interval (0,1] because the MCTS algorithm makes some assumptions on the reward function.
+# Modifications to MCTS
+The standard MCTS algorithm is based on +-1 rewards at end states.  In the Cube space, there is only one reward state, so we have to estimate the possible reward at each node.  
+
+Node selection in MCTS is done using different algorithms, including KL-distance and weighting nodes based on number of visits.  In the Cube MCTS, a simple softmax() function is used to weight the candiate nodes.  This can be tuned using the softmax "temperature" parameter, so there is no need for the additional logic from MCTS to balance exploitation vs exploration.
+
+Node playout or rollout in MCTS plays from the selected node until an end state is found.  In the Cube space, this is almost impossible so the rollout function just looks 1 layer deeper and then the node with the best reward is back-propagated.
 # Some Thoughts
 Is it actually possible to estimate entropy (the distance from a given cube to solved state)?
 
 Perhaps there is insufficient information in the cube to determine it's state.  What would this mean?  If you try to solve a cube by examining and un-doing moves, you can find the solution for up to 4-5 rotations, but beyond that it becomes very difficult to sed the reverse moves.  Does this mean that the cube really does have something like entropy and tends to a random state where information about the original structure (solved state) is no longer available??
 
 # To do
-* Re-do NN training.  Using the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
-* Re-implement MCTS using distance estimated from NN.
-* Use a hard-coded voting algorithm instead of the NN.
+* Consider the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
 
 # References
 https://paperswithcode.com/paper/solving-the-rubiks-cube-with-approximate
