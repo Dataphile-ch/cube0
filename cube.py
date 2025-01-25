@@ -207,6 +207,13 @@ class Cube :
         return self.entropy
     
     def estimate_distance(self) :
+        """
+        Returns: estimate of the distance from this state to solved state.
+        i.e. number of rotations needed
+        -------
+        To do: implement as NN inference from features
+        
+        """
         # estimate the number of moves to solved state
         # range: 1-20
         # simple linear rescaling of entropy measures with weighted average
@@ -225,13 +232,12 @@ class Cube :
         
     def get_reward(self) :
         """
-        Returns: estimate of the distance from this state to solved state.
-        i.e. number of rotations needed
-        -------
-        To do: implement as NN inference from features
-        
+        Convert the distance estimate to a reward function.
+        MCTS is assuming (discounted) +-1 rewards from win/loss states
+        We only have 1 reward state, and a distance estimate [0-20]
+        1/(Di+1) is a (0-1] reward function.  Some shifting and scaling re-balances the value of nodes        
         """
-        return self.estimate_distance()
+        return (10/(self.estimate_distance()+10))
 
     def rotate(self, r, level=1) :
         

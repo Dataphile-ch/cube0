@@ -42,7 +42,7 @@ class TreeHorn :
         self.parent = parent
         self.parent_action = parent_action
         self.reward = self.state.get_reward()
-        self.best_reward = 20 # I think I need this ...
+        self.best_reward = 1 # solved state
         self.best_action = None
         self.children = [] # should be node + action
         self.num_visits = 1 # initialize to 1 to stop div0 errors
@@ -51,7 +51,28 @@ class TreeHorn :
         self.possible_actions = self.state.get_possible_actions(parent_action)
 
         return
+
+    def traverse(self, node) :
+        """
+        go down the tree and collect statistics
+        """
+        node = node
+        depth = 1
+        childs = len(node.children)
+        if childs != 0 : depth += 1
+        for child_node in node.children :
+            d, c = node.traverse(child_node)
+            childs += c
+        return depth, childs
+        
+    def __str__(self) :
+        c = len(self.children)
+        return f'Node has {c} children'
     
+    def softmax(X : np.array, theta) :
+        X = X * theta
+        return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
+
     def is_root_node(self):
         if self.parent is None :
             return True
@@ -67,7 +88,9 @@ class TreeHorn :
     def best_child(self, explore_param=0.2):
         """
         Find a child node to explore, using exploitation vs exploration
-        TO DO: this is too deterministic, the search keeps going deeper down the same path
+        TO DO: 
+            add KL divergence to weight unvisited nodes.
+            convert weights to probabilities using softmax
         """
         if not self.children :
             raise Exception("Attempt to find children before expanding")
@@ -75,7 +98,7 @@ class TreeHorn :
         # select either the best child, or a random child node
         if np.random.choice([0,1],p=[explore_param,1-explore_param]) :
             # exploit
-            choices_weights = [(20-c.best_reward) for c in self.children]        
+            choices_weights = [(c.best_reward) for c in self.children]        
             return self.children[np.argmax(choices_weights)]
         else :
             # explore
@@ -93,7 +116,7 @@ class TreeHorn :
 
         for a in self.possible_actions :
             next_state = deepcopy(self.state)
-            next_state.move([a]) # ??
+            next_state.move([a]) 
             child_node = TreeHorn(next_state, parent=self, parent_action=a)
             self.children.append(child_node)
         return True
@@ -149,9 +172,11 @@ class TreeHorn :
         """
         for i in range(trials):
             v = self.tree_policy() # get a node to try
+            if v.is_terminal_node() :
+                break
             reward, action = v.rollout() # possible reward from that node
             v.backpropagate(reward, action)
-            if reward == 0 :
+            if v.is_terminal_node() :
                 break
 	
-        return reward == 0
+        return v.is_terminal_node()
