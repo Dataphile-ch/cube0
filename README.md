@@ -44,6 +44,7 @@ Perhaps there is insufficient information in the cube to determine it's state.  
 
 # To do
 * Consider the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
+* Softmax temperature parameter controls the weights for the node selection.  Higher numbers favour exploration, lower numbers favour exploitation.  Consider changing the strategy depending on cube entropy.  High entropy cubes need more exploration...
 
 # References
 https://paperswithcode.com/paper/solving-the-rubiks-cube-with-approximate
