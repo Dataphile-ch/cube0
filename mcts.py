@@ -105,9 +105,8 @@ class TreeHorn :
         # higher values will select more random nodes (explore vs exploit)
         # No further parameters needed to control exploit vs explore !
         # TO DO: consider weighing by number of visits.
-        TO DO: 
-            add KL divergence to weight unvisited nodes.
-            convert weights to probabilities using softmax
+        # Testing : adjust the softmax temp to favour exploration 
+        for cubes with higher entropy.
         """
         if not self.children :
             raise Exception("Attempt to find best child of unexpanded node")
@@ -119,8 +118,10 @@ class TreeHorn :
             return self.children[np.argmax(child_rewards)]
         else :
             # explore
-            if not explore_param : explore_param=self.explore_param        
-            weights = self.softmax(child_rewards,explore_param)
+            if not explore_param : theta=self.explore_param        
+            entropy = self.state.estimate_distance()
+            theta = entropy/20
+            weights = self.softmax(child_rewards,theta=theta)
             rand_child = np.random.choice(len(self.children), p=weights)
             return self.children[rand_child]
     

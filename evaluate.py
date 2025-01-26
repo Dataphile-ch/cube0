@@ -13,6 +13,8 @@ from mcts import TreeHorn
 from ast import literal_eval
 from csv import writer
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import pandas as pd
 
 #%% Functions
 
@@ -20,7 +22,8 @@ from tqdm import tqdm
 #%% Main
 iterations = 100000 # iterations per solve attempt
 explore_param = 0.1
-scrambles = range(5,15+1)
+scrambles = range(8,10+1)
+
 samples = 50 # how many samples at each scramble level
 
 results = []
@@ -41,4 +44,11 @@ with open('evaluate.csv', 'w') as f:
     write.writerow(headings)
     write.writerows(results)
 
+#%% Plotting
 
+fig, ax = plt.subplots()
+
+eval = pd.read_csv('evaluate 20250125.csv')
+bars = eval.groupby(by='Scrambles').mean()
+
+ax = bars.plot.bar(y='Success')
