@@ -6,7 +6,7 @@ Created on Wed Jan 22 13:12:02 2025
 @author: william
 
 Implement the MCTS algorithm for cube solving.
-TO DO:
+#TO DO:
     Consider using num_visits to de-weight nodes that have been visited too often.
 
 """
@@ -47,7 +47,6 @@ class TreeHorn :
 
         self.reward = self.state.get_reward()
         self.best_reward = self.reward
-        self.best_action = None
         self.children = [] 
         self.num_visits = 1 # initialize to 1 to stop div0 errors
         self.possible_actions = self.state.get_possible_actions(parent_action)
@@ -155,24 +154,22 @@ class TreeHorn :
 
         return current_node
 
-    def backpropagate(self, reward, action):
+    def backpropagate(self, reward):
         """
         Backpropogate the best reward from this node to parent(s)
-        And the action that got us here, so we can come back if interested
                 
         """
         self.num_visits += 1.
         if reward > self.best_reward :
             self.best_reward = reward
-            self.best_action = action
         if self.parent:
-            self.parent.backpropagate(self.best_reward, self.parent_action)
+            self.parent.backpropagate(self.best_reward)
 
     def rollout(self):
         """
         This will normally simulate the game until it finds a solved state.
         However, for the cube problem, we will only simulate the next leve.
-        i.e. we just need to get the reward and action for the best child.
+        i.e. we just need to get the reward for the best child.
         
         May be improved by searching down 2-3 layers for best reward, 
         if this can be done cheaply.
@@ -181,11 +178,28 @@ class TreeHorn :
             raise Exception('Attempt to rollout from solved cube')
 
         best = self.best_child(explore_param=0.0)
-        reward = best.reward
-        parent_action = best.parent_action
-        
-        return reward, parent_action
-            
+
+        return best.reward
+
+    def deep_rollout(self) :
+        """
+        Explore 3 moves from current cube state and return best reward.
+        15**3 = 3375 cubes to evaluate...
+        TO DO: eliminate redundant rotations
+        """
+        start_state = deepcopy(self.state.cube)
+        rollout_cube = Cube()
+        actions = rollout_cube.get_possible_actions()
+        moves = [(r1,r2,r3) for r1 in actions for r2 in actions for r3 in actions]
+
+        best_reward = 0
+        for m in moves :
+            rollout_cube.cube = start_state
+            rollout_cube.move(m)
+            reward = rollout_cube.get_reward()
+            best_reward = max(best_reward, reward)
+        return best_reward
+
     def mcts_search(self):
         """
         pick a node, find a possible reward, backpropogate.
@@ -193,8 +207,8 @@ class TreeHorn :
         """
         for i in range(self.iterations):
             v = self.tree_policy() # get a node to try
-            reward, action = v.rollout() # possible reward from that node
-            v.backpropagate(reward, action)
+            reward = v.rollout() # possible reward from that node
+            v.backpropagate(reward)
             if reward==1 :
                 break
 	
