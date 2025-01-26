@@ -30,6 +30,7 @@ Several definitions of cube entropy are evaluated:
 * Naive entropy: count the number of "stickers" that are on the wrong face.
 * Alignment entropy: based on the observation that corner and edge cubelets need to be aligned before they can be moved into place, how many alignments are there in the cube?
 * Matrix entropy: use a linear algebra distance norm to calculate the distance between the current cube and the solved cube in matrix/vector form.
+
 The entropy is then used to estimate the distance to the solved state.  The distance is then converted to a reward function in the interval (0,1] because the MCTS algorithm makes some assumptions on the reward function.
 # Modifications to MCTS
 The standard MCTS algorithm is based on +-1 rewards at end states.  In the Cube space, there is only one reward state, so we have to estimate the possible reward at each node.  
