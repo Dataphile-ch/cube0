@@ -48,7 +48,7 @@ with open('evaluate.csv', 'w') as f:
 
 fig, ax = plt.subplots()
 
-eval = pd.read_csv('evaluate 20250125.csv')
+eval = pd.read_csv('evaluate.csv')
 bars = eval.groupby(by='Scrambles').mean()
 
 ax = bars.plot.bar(y='Success')

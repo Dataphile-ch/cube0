@@ -27,7 +27,7 @@ def inverse_move(moves) :
 #%% Solve
 iterations = 100000
 explore_param = 0.1
-scrambles = 10
+scrambles = 5
 
 rubiks = Cube()
 rubiks.move(rubiks.rand_move(scrambles))

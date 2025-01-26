@@ -118,8 +118,8 @@ class TreeHorn :
         else :
             # explore
             if not explore_param : theta=self.explore_param        
-            entropy = self.state.estimate_distance()
-            theta = entropy/20
+#            entropy = self.state.estimate_distance()
+#            theta = entropy/20
             weights = self.softmax(child_rewards,theta=theta)
             rand_child = np.random.choice(len(self.children), p=weights)
             return self.children[rand_child]
@@ -176,6 +176,9 @@ class TreeHorn :
         """
         if self.is_terminal_node() or (not self.children):
             raise Exception('Attempt to rollout from solved cube')
+            
+        for c in self.children :
+            c.best_reward = c.deep_rollout()
 
         best = self.best_child(explore_param=0.0)
 
@@ -183,14 +186,13 @@ class TreeHorn :
 
     def deep_rollout(self) :
         """
-        Explore 3 moves from current cube state and return best reward.
-        15**3 = 3375 cubes to evaluate...
+        Explore 2 moves from current cube state and return best reward.
         TO DO: eliminate redundant rotations
         """
         start_state = deepcopy(self.state.cube)
         rollout_cube = Cube()
         actions = rollout_cube.get_possible_actions()
-        moves = [(r1,r2,r3) for r1 in actions for r2 in actions for r3 in actions]
+        moves = [(r1,r2) for r1 in actions for r2 in actions]
 
         best_reward = 0
         for m in moves :
