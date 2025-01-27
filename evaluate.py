@@ -24,7 +24,7 @@ iterations = 100000 # iterations per solve attempt
 explore_param = 0.1
 scrambles = range(8,10+1)
 
-samples = 50 # how many samples at each scramble level
+samples = 10 # how many samples at each scramble level
 
 results = []
 for s in scrambles :

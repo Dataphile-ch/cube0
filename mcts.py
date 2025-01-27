@@ -53,18 +53,6 @@ class TreeHorn :
 
         return
 
-    def traverse(self) :
-        """
-        go down the tree and collect statistics
-        """
-        childs = len(self.children)
-        max_depth = 1
-        for child_node in self.children :
-            d, c = child_node.traverse()
-            childs += c
-            max_depth = max(d+1, max_depth)
-        return max_depth, childs
-        
     def __str__(self) :
         d,c = self.traverse()
         r = self.best_reward
@@ -79,6 +67,18 @@ class TreeHorn :
         s = r == 1
         return f'[{s},{c},{d},{r:.3f}]'
     
+    def traverse(self) :
+        """
+        go down the tree and collect statistics
+        """
+        childs = len(self.children)
+        max_depth = 1
+        for child_node in self.children :
+            d, c = child_node.traverse()
+            childs += c
+            max_depth = max(d+1, max_depth)
+        return max_depth, childs
+        
     def softmax(self, X : np.array, theta=1) :
         X = X / theta
         return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
@@ -186,20 +186,21 @@ class TreeHorn :
 
     def deep_rollout(self) :
         """
-        Explore 2 moves from current cube state and return best reward.
+        Explore moves from current cube state and return best reward.
         TO DO: eliminate redundant rotations
         """
         start_state = deepcopy(self.state.cube)
         rollout_cube = Cube()
-        actions = rollout_cube.get_possible_actions()
-        moves = [(r1,r2) for r1 in actions for r2 in actions]
+        possible_actions = rollout_cube.get_possible_actions(self.parent_action)
+        all_actions = rollout_cube.get_possible_actions()
+#        moves = [(r1,r2) for r1 in possible_actions for r2 in all_actions]
+        moves = possible_actions
 
-        best_reward = 0
         for m in moves :
             rollout_cube.cube = start_state
-            rollout_cube.move(m)
+            rollout_cube.move([m])
             reward = rollout_cube.get_reward()
-            best_reward = max(best_reward, reward)
+            best_reward = max(self.best_reward, reward)
         return best_reward
 
     def mcts_search(self):
