@@ -22,7 +22,7 @@ import pandas as pd
 #%% Main
 iterations = 100000 # iterations per solve attempt
 explore_param = 0.1
-scrambles = range(8,10+1)
+scrambles = range(10,12+1)
 
 samples = 10 # how many samples at each scramble level
 
