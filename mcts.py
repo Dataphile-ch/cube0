@@ -51,6 +51,9 @@ class TreeHorn :
         self.num_visits = 1 # initialize to 1 to stop div0 errors
         self.possible_actions = self.state.get_possible_actions(parent_action)
 
+        if __name__ == '__main__' :
+            print('Main')
+
         return
 
     def __str__(self) :
