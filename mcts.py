@@ -15,6 +15,7 @@ Implement the MCTS algorithm for cube solving.
 import numpy as np
 from cube import Cube
 from copy import deepcopy
+import multiprocessing as mp
 
 #%% Functions
 
@@ -177,7 +178,12 @@ class TreeHorn :
         if self.is_terminal_node() or (not self.children):
             raise Exception('Attempt to rollout from solved cube')
             
+        processes = []
         for c in self.children :
+#            p = mp.Process(target=c.deep_rollout)
+#            processes.append(p)
+#        [proc.start() for proc in processes]    
+
             c.best_reward = c.deep_rollout()
 
         best = self.best_child(explore_param=0.0)
@@ -189,18 +195,28 @@ class TreeHorn :
         Explore moves from current cube state and return best reward.
         TO DO: eliminate redundant rotations
         """
+        
         start_state = deepcopy(self.state.cube)
         rollout_cube = Cube()
         possible_actions = rollout_cube.get_possible_actions(self.parent_action)
         all_actions = rollout_cube.get_possible_actions()
-#        moves = [(r1,r2) for r1 in possible_actions for r2 in all_actions]
-        moves = possible_actions
+        moves2 = [[r1,r2] for r1 in possible_actions for r2 in all_actions if r1[0] != r2[0]]
+        moves = [[a] for a in possible_actions] + moves2
 
         for m in moves :
             rollout_cube.cube = start_state
-            rollout_cube.move([m])
+            rollout_cube.move(m)
             reward = rollout_cube.get_reward()
             best_reward = max(self.best_reward, reward)
+        self.parent.best_reward = best_reward
+
+#        parent_moves = []
+#        backmoves = self
+#        while backmoves.parent :
+#            parent_moves.append(backmoves.parent_action)
+#            backmoves = backmoves.parent
+#        print(f'Reward: {best_reward:.2f} from {parent_moves[::-1]}')
+
         return best_reward
 
     def mcts_search(self):
