@@ -54,5 +54,5 @@ if __name__ == '__main__'  :
         solve_moves.append(path.parent_action)
     print('Solve moves: \t', solve_moves)
     print(root)
-    print(f'Working time: \t {int(elapsed/60):02d}:{int(elapsed%60):02d}')
+    print(f'Working time: \t {int(elapsed/3600):01d}:{int(elapsed/60%60):02d}:{int(elapsed%60):02d}')
 
