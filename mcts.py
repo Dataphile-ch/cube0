@@ -80,10 +80,6 @@ class TreeHorn :
             max_depth = max(d+1, max_depth)
         return max_depth, childs
         
-    def softmax(self, X : np.array, theta=1) :
-        X = X / theta
-        return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
-
     def is_root_node(self):
         if self.parent is None :
             return True
@@ -95,7 +91,15 @@ class TreeHorn :
     
     def is_fully_expanded(self):
         return ( len(self.children) == len(self.possible_actions) )
-    
+
+###
+###  Everything from here down should be outside the class definition.
+###
+
+    def softmax(self, X : np.array, theta=1) :
+        X = X / theta
+        return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
+
     def best_child(self, explore_param=None):
         """
         Find a child node to explore, using exploitation vs exploration
