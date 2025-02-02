@@ -37,9 +37,9 @@ def plot_it() :
 def main() :
     iterations = 100000 # iterations per solve attempt
     explore_param = 0.05
-    scrambles = range(4,4+1)
-    
-    samples = 10 # how many samples at each scramble level
+
+    scrambles = range(10,10+1)
+    samples = 5 # how many samples at each scramble level
     
     results = []
     for s in scrambles :
@@ -57,7 +57,6 @@ def main() :
             result = literal_eval(repr(root))
             result.append(s)
             results.append(result)
-            results.append(int(elapsed))
         print(f'\nLevel: {s}, success rate: {success/samples:.1%}')
     
     headings = ['Success', 'Nodes', 'Depth', 'MaxReward', 'Scrambles', 'Elapsed']

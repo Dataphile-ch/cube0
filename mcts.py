@@ -166,7 +166,7 @@ def backpropagate(node : TreeHorn, reward):
     if node.parent:
         backpropagate(node.parent, node.best_reward)
 
-def rollout(node : TreeHorn):
+def rollout(node : TreeHorn, queue_in, queue_out):
     """
     This will normally simulate the game until it finds a solved state.
     However, for the cube problem, we will only simulate the next leve.
@@ -179,44 +179,72 @@ def rollout(node : TreeHorn):
         raise Exception('Attempt to rollout from solved cube')
         
     for c in node.children :
-        c.best_reward = deep_rollout(c)
+        c.best_reward = deep_rollout(c, queue_in, queue_out)
 
     best = best_child(node, explore_param=0.0)
 
     return best.reward
 
-def deep_rollout(node : TreeHorn) :
+def deep_rollout(node : TreeHorn, queue_in, queue_out) :
     """
     Explore moves from current cube state and return best reward.
     TO DO: eliminate redundant rotations
     """
     
-    start_state = deepcopy(node.state.cube)
-    rollout_cube = Cube()
-    possible_actions = rollout_cube.get_possible_actions(node.parent_action)
-    all_actions = rollout_cube.get_possible_actions()
+    possible_actions = node.state.get_possible_actions(node.parent_action)
+    all_actions = node.state.get_possible_actions()
     moves2 = [[r1,r2] for r1 in possible_actions for r2 in all_actions if r1[0] != r2[0]]
     moves = [[a] for a in possible_actions] + moves2
 
+    start_state = deepcopy(node.state.cube)
     for m in moves :
-        rollout_cube.cube = start_state
-        rollout_cube.move(m)
-        reward = rollout_cube.get_reward()
-        best_reward = max(node.best_reward, reward)
-    node.parent.best_reward = best_reward
+        queue_in.put((start_state,m))
+    rewards = [node.best_reward]
+    for m in moves:
+        reward = queue_out.get() # get will wait for each return value
+        rewards.append(reward) 
+    best_reward = max(rewards)
+    node.best_reward = best_reward
 
     return best_reward
 
-def mcts_search(node, iterations=100, explore_param=0.1):
+class Worker(mp.Process):
+    def __init__(self, queue_in, queue_out):
+        super().__init__(daemon=True)
+        self.queue_in = queue_in
+        self.queue_out = queue_out
+        self.play_cube = Cube()
+
+    def run(self):
+        while True :
+            (cube_state, move) = self.queue_in.get()
+            self.play_cube.cube = cube_state
+            self.play_cube.move(move)
+            reward = self.play_cube.get_reward()
+            self.queue_out.put(reward)
+
+
+def mcts_search(node, iterations=100, explore_param=0.05):
     """
     pick a node, find a possible reward, backpropogate.
     repeat n times, and then return the best child.
     """
+    
+    queue_in = mp.Queue()
+    queue_out = mp.Queue()
+
+    workers = [
+        Worker(queue_in, queue_out)
+        for _ in range(8) ### Number of workers ###
+    ]
+    for worker in workers:
+        worker.start()
+    
     for i in range(iterations):
         v = tree_policy(node, explore_param) # get a node to try
-        reward = rollout(v) # possible reward from that node
+        reward = rollout(v, queue_in, queue_out) # possible reward from that node
         backpropagate(v, reward)
-        if reward==1 :
+        if node.best_reward==1 :
             break
 	
-    return (reward==1)
+    return (node.best_reward==1)
