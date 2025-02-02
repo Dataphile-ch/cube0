@@ -39,12 +39,10 @@ class TreeHorn :
     
     """
     
-    def __init__(self, state : Cube, parent=None, parent_action=None, iterations=100, explore_param=0.5) :
+    def __init__(self, state : Cube, parent=None, parent_action=None) :
         self.state = state 
         self.parent = parent
         self.parent_action = parent_action
-        self.iterations = iterations
-        self.explore_param = explore_param
 
         self.reward = self.state.get_reward()
         self.best_reward = self.reward
@@ -92,43 +90,6 @@ class TreeHorn :
     def is_fully_expanded(self):
         return ( len(self.children) == len(self.possible_actions) )
 
-###
-###  Everything from here down should be outside the class definition.
-###
-
-    def softmax(self, X : np.array, theta=1) :
-        X = X / theta
-        return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
-
-    def best_child(self, explore_param=None):
-        """
-        Find a child node to explore, using exploitation vs exploration
-
-        # explore paramter is either 0 (no exploration, just best reward) or used as Theta in softmax
-        # low values of theta will generate less randomness (exploit vs explore)
-        # higher values will select more random nodes (explore vs exploit)
-        # No further parameters needed to control exploit vs explore !
-        # TO DO: consider weighing by number of visits.
-        # Testing : adjust the softmax temp to favour exploration 
-        for cubes with higher entropy.
-        """
-        if not self.children :
-            raise Exception("Attempt to find best child of unexpanded node")
-
-        child_rewards = np.array( [(c.best_reward) for c in self.children] )
-
-        if explore_param == 0 :
-            # full exploit
-            return self.children[np.argmax(child_rewards)]
-        else :
-            # explore
-            if not explore_param : theta=self.explore_param        
-#            entropy = self.state.estimate_distance()
-#            theta = entropy/20
-            weights = self.softmax(child_rewards,theta=theta)
-            rand_child = np.random.choice(len(self.children), p=weights)
-            return self.children[rand_child]
-    
     def expand(self):
         """
         Create child nodes with new state from all possible actions.
@@ -141,98 +102,121 @@ class TreeHorn :
         for a in self.possible_actions :
             next_state = deepcopy(self.state)
             next_state.move([a]) 
-            child_node = TreeHorn(next_state, parent=self, parent_action=a, explore_param=self.explore_param)
+            child_node = TreeHorn(next_state, parent=self, parent_action=a)
             self.children.append(child_node)
         return True
 
-    def tree_policy(self):
-        """
-        select the next node for rollout.  Search recursively down the tree using "best child".
-        when we get to an unexpanded node, expand it and return.
-        """
-    
-        current_node = self
-        while current_node.is_fully_expanded() :  # go recursively down the tree
-            current_node = current_node.best_child()
+###
+###  Everything from here down should be outside the class definition.
+###
 
-        current_node.expand()
+def softmax( X : np.array, theta=1) :
+    X = X / theta
+    return(np.exp(X - np.max(X)) / np.exp(X - np.max(X)).sum())
 
-        return current_node
+def best_child(node : TreeHorn, explore_param=0.0):
+    """
+    Find a child node to explore, using exploitation vs exploration
 
-    def backpropagate(self, reward):
-        """
-        Backpropogate the best reward from this node to parent(s)
-                
-        """
-        self.num_visits += 1.
-        if reward > self.best_reward :
-            self.best_reward = reward
-        if self.parent:
-            self.parent.backpropagate(self.best_reward)
+    # explore paramter is either 0 (no exploration, just best reward) or used as Theta in softmax
+    # low values of theta will generate less randomness (exploit vs explore)
+    # higher values will select more random nodes (explore vs exploit)
+    # No further parameters needed to control exploit vs explore !
+    # TO DO: consider weighing by number of visits.
+    # Testing : adjust the softmax temp to favour exploration 
+    for cubes with higher entropy.
+    """
+    if not node.children :
+        raise Exception("Attempt to find best child of unexpanded node")
 
-    def rollout(self):
-        """
-        This will normally simulate the game until it finds a solved state.
-        However, for the cube problem, we will only simulate the next leve.
-        i.e. we just need to get the reward for the best child.
-        
-        May be improved by searching down 2-3 layers for best reward, 
-        if this can be done cheaply.
-        """
-        if self.is_terminal_node() or (not self.children):
-            raise Exception('Attempt to rollout from solved cube')
+    child_rewards = np.array( [(c.best_reward) for c in node.children] )
+
+    if explore_param == 0 :
+        # full exploit
+        return node.children[np.argmax(child_rewards)]
+    else :
+        # explore
+        weights = softmax(child_rewards,theta=explore_param)
+        rand_child = np.random.choice(len(node.children), p=weights)
+        return node.children[rand_child]
+
+def tree_policy(node : TreeHorn, explore_param:float):
+    """
+    select the next node for rollout.  Search recursively down the tree using "best child".
+    when we get to an unexpanded node, expand it and return.
+    """
+
+    current_node = node
+    while current_node.is_fully_expanded() :  # go recursively down the tree
+        current_node = best_child(current_node, explore_param)
+
+    current_node.expand()
+
+    return current_node
+
+
+def backpropagate(node : TreeHorn, reward):
+    """
+    Backpropogate the best reward from this node to parent(s)
             
-        processes = []
-        for c in self.children :
-#            p = mp.Process(target=c.deep_rollout)
-#            processes.append(p)
-#        [proc.start() for proc in processes]    
+    """
+    node.num_visits += 1.
+    if reward > node.best_reward :
+        node.best_reward = reward
+    if node.parent:
+        backpropagate(node.parent, node.best_reward)
 
-            c.best_reward = c.deep_rollout()
-
-        best = self.best_child(explore_param=0.0)
-
-        return best.reward
-
-    def deep_rollout(self) :
-        """
-        Explore moves from current cube state and return best reward.
-        TO DO: eliminate redundant rotations
-        """
+def rollout(node : TreeHorn):
+    """
+    This will normally simulate the game until it finds a solved state.
+    However, for the cube problem, we will only simulate the next leve.
+    i.e. we just need to get the reward for the best child.
+    
+    May be improved by searching down 2-3 layers for best reward, 
+    if this can be done cheaply.
+    """
+    if node.is_terminal_node() or (not node.children):
+        raise Exception('Attempt to rollout from solved cube')
         
-        start_state = deepcopy(self.state.cube)
-        rollout_cube = Cube()
-        possible_actions = rollout_cube.get_possible_actions(self.parent_action)
-        all_actions = rollout_cube.get_possible_actions()
-        moves2 = [[r1,r2] for r1 in possible_actions for r2 in all_actions if r1[0] != r2[0]]
-        moves = [[a] for a in possible_actions] + moves2
+    for c in node.children :
+        c.best_reward = deep_rollout(c)
 
-        for m in moves :
-            rollout_cube.cube = start_state
-            rollout_cube.move(m)
-            reward = rollout_cube.get_reward()
-            best_reward = max(self.best_reward, reward)
-        self.parent.best_reward = best_reward
+    best = best_child(node, explore_param=0.0)
 
-#        parent_moves = []
-#        backmoves = self
-#        while backmoves.parent :
-#            parent_moves.append(backmoves.parent_action)
-#            backmoves = backmoves.parent
-#        print(f'Reward: {best_reward:.2f} from {parent_moves[::-1]}')
+    return best.reward
 
-        return best_reward
+def deep_rollout(node : TreeHorn) :
+    """
+    Explore moves from current cube state and return best reward.
+    TO DO: eliminate redundant rotations
+    """
+    
+    start_state = deepcopy(node.state.cube)
+    rollout_cube = Cube()
+    possible_actions = rollout_cube.get_possible_actions(node.parent_action)
+    all_actions = rollout_cube.get_possible_actions()
+    moves2 = [[r1,r2] for r1 in possible_actions for r2 in all_actions if r1[0] != r2[0]]
+    moves = [[a] for a in possible_actions] + moves2
 
-    def mcts_search(self):
-        """
-        pick a node, find a possible reward, backpropogate.
-        repeat n times, and then return the best child.
-        """
-        for i in range(self.iterations):
-            v = self.tree_policy() # get a node to try
-            reward = v.rollout() # possible reward from that node
-            v.backpropagate(reward)
-            if reward==1 :
-                break
+    for m in moves :
+        rollout_cube.cube = start_state
+        rollout_cube.move(m)
+        reward = rollout_cube.get_reward()
+        best_reward = max(node.best_reward, reward)
+    node.parent.best_reward = best_reward
+
+    return best_reward
+
+def mcts_search(node, iterations=100, explore_param=0.1):
+    """
+    pick a node, find a possible reward, backpropogate.
+    repeat n times, and then return the best child.
+    """
+    for i in range(iterations):
+        v = tree_policy(node, explore_param) # get a node to try
+        reward = rollout(v) # possible reward from that node
+        backpropagate(v, reward)
+        if reward==1 :
+            break
 	
-        return (reward==1)
+    return (reward==1)

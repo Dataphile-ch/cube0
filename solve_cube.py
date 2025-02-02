@@ -7,7 +7,7 @@ Created on Thu Jan 23 15:46:34 2025
 """
 #%% Setup
 from cube import Cube
-from mcts import TreeHorn
+import mcts
 import time
 
 #%% Functions
@@ -29,15 +29,15 @@ if __name__ == '__main__'  :
     
     iterations = 100000
     explore_param = 0.05
-    scrambles = 10
+    scrambles = 5
     
     rubiks = Cube()
     rubiks.move(rubiks.rand_move(scrambles))
     
-    root = TreeHorn(rubiks, iterations=iterations, explore_param=explore_param)
+    root = mcts.TreeHorn(rubiks)
     
     tic = time.time()
-    solved = root.mcts_search()
+    solved = mcts.mcts_search(root, iterations=iterations, explore_param=explore_param)
     toc = time.time()
     elapsed = toc-tic
     
@@ -50,7 +50,7 @@ if __name__ == '__main__'  :
     solve_moves = []
     path = root
     while path.is_fully_expanded() :
-        path = path.best_child(explore_param=0.0)
+        path = mcts.best_child(path, explore_param=0.0)
         solve_moves.append(path.parent_action)
     print('Solve moves: \t', solve_moves)
     print(root)
