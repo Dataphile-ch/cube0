@@ -246,5 +246,9 @@ def mcts_search(node, iterations=100, explore_param=0.05):
         backpropagate(v, reward)
         if node.best_reward==1 :
             break
+
+    for worker in workers:
+        worker.terminate()
+        worker.close()
 	
     return (node.best_reward==1)
