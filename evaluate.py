@@ -38,7 +38,7 @@ def main() :
     iterations = 100000 # iterations per solve attempt
     explore_param = 0.05
 
-    scrambles = range(8,10+1)
+    scrambles = range(4,4+1)
     samples = 5 # how many samples at each scramble level
     
     results = []
@@ -61,13 +61,13 @@ def main() :
         print(f'\nLevel: {s}, success rate: {success/samples:.1%}')
     
     headings = ['Success', 'Nodes', 'Depth', 'MaxReward', 'Scrambles', 'Elapsed']
-    with open('evaluate.csv', 'w') as f:
-        write = writer(f)
-        write.writerow(headings)
-        write.writerows(results)
+#    with open('evaluate.csv', 'w') as f:
+#        write = writer(f)
+#        write.writerow(headings)
+#        write.writerows(results)
     
-    return True
+    return results
 
 if __name__ == '__main__'  :
-    main()
+    results = main()
     
