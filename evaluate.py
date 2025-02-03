@@ -38,7 +38,7 @@ def main() :
     iterations = 100000 # iterations per solve attempt
     explore_param = 0.05
 
-    scrambles = range(10,10+1)
+    scrambles = range(8,10+1)
     samples = 5 # how many samples at each scramble level
     
     results = []
@@ -52,10 +52,11 @@ def main() :
             tic = time.time()
             solved = mcts.mcts_search(root, iterations=iterations, explore_param=explore_param)
             toc = time.time()
-            elapsed = toc-tic
+            elapsed = (toc-tic) // 0.01 / 100
             if solved : success += 1
             result = literal_eval(repr(root))
             result.append(s)
+            result.append(elapsed)
             results.append(result)
         print(f'\nLevel: {s}, success rate: {success/samples:.1%}')
     

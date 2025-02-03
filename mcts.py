@@ -194,7 +194,8 @@ def deep_rollout(node : TreeHorn, queue_in, queue_out) :
     possible_actions = node.state.get_possible_actions(node.parent_action)
     all_actions = node.state.get_possible_actions()
     moves2 = [[r1,r2] for r1 in possible_actions for r2 in all_actions if r1[0] != r2[0]]
-    moves = [[a] for a in possible_actions] + moves2
+#    moves = [[a] for a in possible_actions] + moves2
+    moves = [[a] for a in possible_actions] 
 
     start_state = deepcopy(node.state.cube)
     for m in moves :
@@ -247,8 +248,8 @@ def mcts_search(node, iterations=100, explore_param=0.05):
         if node.best_reward==1 :
             break
 
-    for worker in workers:
-        worker.terminate()
-        worker.close()
+#    for worker in workers:
+#        worker.terminate()
+#        worker.close()
 	
     return (node.best_reward==1)
