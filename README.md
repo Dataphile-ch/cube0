@@ -37,7 +37,7 @@ The standard MCTS algorithm is based on +-1 rewards at end states.  In the Cube 
 
 Node selection in MCTS is done using different algorithms, including KL-distance and weighting nodes based on number of visits.  In the Cube MCTS, a simple softmax() function is used to weight the candiate nodes.  This can be tuned using the softmax "temperature" parameter, so there is no need for the additional logic from MCTS to balance exploitation vs exploration.
 
-Node playout or rollout in MCTS plays from the selected node until an end state is found.  In the Cube space, this is almost impossible so the rollout function just looks 1 layer deeper and then the node with the best reward is back-propagated.
+Node playout or rollout in MCTS plays from the selected node until an end state is found.  In the Cube space, this is almost impossible so the rollout function just looks 1 layer deeper and then the node with the best reward is back-propagated.  In the latest version, there are multiple process running to evaluate the rewards.
 # Some Thoughts
 Is it actually possible to estimate entropy (the distance from a given cube to solved state)?
 
@@ -46,6 +46,11 @@ Perhaps there is insufficient information in the cube to determine it's state.  
 # To do
 * Consider the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
 * Softmax temperature parameter controls the weights for the node selection.  Higher numbers favour exploration, lower numbers favour exploitation.  Consider changing the strategy depending on cube entropy.  High entropy cubes need more exploration...
+
+# Current Status
+* 1500 nodes per second evaluated.
+* Limited to 1,500,000 nodes, which takes about 15 min per solve
+* 100% success rate at 8 scrambles, 40% at 10 scrambles.
 
 # References
 https://paperswithcode.com/paper/solving-the-rubiks-cube-with-approximate
