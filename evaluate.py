@@ -36,9 +36,9 @@ def plot_it() :
 
 def main() :
     iterations = 100000 # iterations per solve attempt
-    explore_param = 0.05
+    explore_param = 0.01
 
-    scrambles = range(4,4+1)
+    scrambles = range(12,12+1)
     samples = 5 # how many samples at each scramble level
     
     results = []
@@ -56,15 +56,16 @@ def main() :
             if solved : success += 1
             result = literal_eval(repr(root))
             result.append(s)
+            result.append(explore_param)
             result.append(elapsed)
             results.append(result)
         print(f'\nLevel: {s}, success rate: {success/samples:.1%}')
     
-    headings = ['Success', 'Nodes', 'Depth', 'MaxReward', 'Scrambles', 'Elapsed']
-#    with open('evaluate.csv', 'w') as f:
-#        write = writer(f)
+    headings = ['Success', 'Nodes', 'Depth', 'MaxReward', 'Scrambles', 'Theta', 'Elapsed']
+    with open('evaluate.csv', 'a') as f:
+        write = writer(f)
 #        write.writerow(headings)
-#        write.writerows(results)
+        write.writerows(results)
     
     return results
 
