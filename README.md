@@ -46,6 +46,9 @@ Perhaps there is insufficient information in the cube to determine it's state.  
 # To do
 * Consider the approaoch from Brunetto & Trunda (2017), train the network using the 3 entropy measures as features (naive, align, matrix).  The network can be simple DNN with 3-4 layers.  It can then be used to esimate "distance to solved" from any input.
 * Softmax temperature parameter controls the weights for the node selection.  Higher numbers favour exploration, lower numbers favour exploitation.  Consider changing the strategy depending on cube entropy.  High entropy cubes need more exploration...
+* Re-implement the rotations as matrix operations to speed up.  Can be done with simple numpy or tf matmul.
+* Consider changing the internal representation of the cube.  The challenge is to find something which can better represent the scramble/entropy state, for example something where the euclidian distance is more meaningful.
+* Consider an entropy measure based on the number of rotations for each cubelet to go home.  For example, a corner cubelet is always 0,1,2,3 rotations from home.
 
 # Current Status
 * 1500 nodes per second evaluated.
