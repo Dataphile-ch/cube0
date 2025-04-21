@@ -48,10 +48,9 @@ for l in range(1,levels+1) :
         naive=test_cube.entropy
         test_cube.update_entropy('align')
         align=test_cube.entropy
-        test_cube.update_entropy('nn')
-        nn=test_cube.entropy
         tnorm = test_cube.matrix_dist()
-        results.append([l,naive,align, nn, tnorm])
+        reward = test_cube.get_reward()
+        results.append([l,naive,align, reward, tnorm])
 
 #colours = [row[0] for row in results if row[0] in (2,5)]
 #x= [row[3] for row in results if row[0] in (2,5)]
@@ -65,9 +64,9 @@ x= [row[0] for row in results ]
 
 y0= [row[3] for row in results ]
 axs[0,0].scatter(x, y0, c=colours)
-axs[0,0].set_ylabel('NN Entropy')
+axs[0,0].set_ylabel('Reward Fn')
 axs[0,0].set_xlim(0,16)
-axs[0,0].set_ylim(0,levels+1)
+axs[0,0].set_ylim(0,1)
 
 y1= [row[2] for row in results ]
 axs[0,1].scatter(x, y1, c=colours)

@@ -18,46 +18,29 @@ import pickle
 # cubes at k=5 : 1,889,568
 
 
-def sample_cube(cube, k) :
-    """
-    Generate 1 sample cube at depth k rotates from solved state.
-    Returns np.array 6x3x3
-
-    """
-    cube.reset()    
-    move = []
-    i = 0
-    while i < k :
-        move.extend(cube.rand_move(3))
-        move = cube.compress_moves( move )
-        i = len(move)
-    move = move[:k]
-    cube.move(move)
-
-    return k, cube.cube
-
-def make_samples(cube, n_samples=10, k_depth=3) :
+def make_samples( n_samples=10, k_depth=3) :
     # NB samples are converted to vector representation of cube.  i.e. flattened.
+        cube = Cube()
         X = []
         Y = []
-        for k in range(k_depth+1) :
+        for k in range(k_depth) :
             print(f"Generating at Level : {k}")
             for i in range(n_samples) :
             # generate n_samples of cubes
-                y, A = sample_cube(cube, k)
-                vector_A = A.vector_cube()
+                M = cube.rand_move(k)
+                cube.move(M)
+                vector_A = cube.vector_cube()
                 X.append(deepcopy(vector_A))
-                Y.append(y)
+                Y.append(k)
 
         return np.array(X), np.array(Y)
 
-### Main
+#%% Make Sample Data
 
-max_depth = 6
+max_depth = 10
 gen_samples = False
 if gen_samples :
-    cube = Cube()
-    X, Y = make_samples(cube, n_samples=100000, k_depth=max_depth)
+    X, Y = make_samples( n_samples=10000, k_depth=max_depth)
     with open("X_samples.pkl", "wb") as f :
         pickle.dump(X, f)
     with open("Y_samples.pkl", "wb") as f :
@@ -68,33 +51,26 @@ else :
     with open("Y_samples.pkl", "rb") as f :
         Y = pickle.load(f)
 
+#%% Model
 
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.10, random_state=42)
+y_train = keras.utils.to_categorical(y_train, max_depth)
+y_test = keras.utils.to_categorical(y_test, max_depth)
 
-#inputs = keras.Input(shape=(6,3,3), name="cubes")
-#hidden_1 = layers.Flatten()(inputs)
-inputs = keras.Input(shape=(54,1), name="cubes")
-hidden_2 = layers.Dense(8192, activation="relu", name="dense_1")(inputs)
-hidden_3 = layers.Dense(1024, activation="relu", name="dense_2")(hidden_2)
-hidden_4 = layers.Dense(512, activation="relu", name="dense_3")(hidden_3)
-outputs = layers.Dense(max_depth+1, activation="softmax", name="predictions")(hidden_4)
-
-model = keras.Model(inputs=inputs, outputs=outputs)
-
-"""
-model.compile(
-    optimizer=keras.optimizers.RMSprop(),  # Optimizer
-    # Loss function to minimize
-    loss=keras.losses.MeanSquaredError(),
-    # List of metrics to monitor
-    metrics=[keras.metrics.Precision()],
-)
-"""
+model = keras.Sequential(
+    [
+#     keras.Input(shape=(54,1), name="cubes"),
+     layers.Dense(8192, activation="relu", name="dense_1"),
+     layers.Dense(1024, activation="relu", name="dense_2"),
+     layers.Dense(512, activation="relu", name="dense_3"),
+     layers.Dense(max_depth, activation="softmax", name="predictions")
+     ]
+    )
 
 model.compile(
-    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    optimizer=keras.optimizers.RMSprop(),
-    metrics=[keras.metrics.SparseCategoricalAccuracy()],
+    loss=keras.losses.CategoricalCrossentropy(),
+    optimizer=keras.optimizers.SGD(),
+    metrics=[keras.metrics.CategoricalAccuracy()],
 )
 
 print("Fit model on training data")
